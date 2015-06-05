@@ -5,3 +5,4 @@ data2 = parse_json(urlread(link2))
 %imhot
 %imhotter
 %coolio
+%coolio 2
