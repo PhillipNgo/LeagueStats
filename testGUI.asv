@@ -97,7 +97,7 @@ global version
 champion_list = cellstr(get(hObject,'String'));
 selected_champion = champion_list{get(hObject,'Value')};
 imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/' selected_champion '.png']));
-
+keyboard
 % --- Executes during object creation, after setting all properties.
 function champion_menu_CreateFcn(hObject, eventdata, handles)
 
