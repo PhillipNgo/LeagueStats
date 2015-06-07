@@ -19,4 +19,5 @@ champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/
 champion = parse_json(urlread(champion_link));
 
 %% Find Alphabetical Position of Champion
-position = find(cellfun('length',regexp(fieldnames(champions.data), 'Aatrox')) == 1); 
+champion_names = fieldnames(champions.data); % list of names in alphabetical prder
+position = find(cellfun('length',regexp(champion_names, 'Aatrox')) == 1); 

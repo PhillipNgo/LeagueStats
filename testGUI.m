@@ -22,7 +22,7 @@ function varargout = testGUI(varargin)
 
 % Edit the above text to modify the response to help testGUI
 
-% Last Modified by GUIDE v2.5 03-Jun-2015 09:32:37
+% Last Modified by GUIDE v2.5 06-Jun-2015 20:36:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,6 +61,17 @@ guidata(hObject, handles);
 % UIWAIT makes testGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+global version
+global champions
+
+version_link = 'https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=f1153217-7b9e-4adc-9036-596a248cb50b';
+version = parse_json(urlread(version_link));
+version = version{1};
+
+all_champions_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion.json'];
+champions = parse_json(urlread(all_champions_link));
+
+imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/Aatrox.png']));
 
 % --- Outputs from this function are returned to the command line.
 function varargout = testGUI_OutputFcn(hObject, eventdata, handles) 
@@ -82,6 +93,10 @@ function popupmenu1_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu1 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu1
 
+global version
+champion_list = cellstr(get(hObject,'String'));
+selected_champion = champion_list{get(hObject,'Value')};
+imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/' selected_champion '.png']));
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu1_CreateFcn(hObject, eventdata, handles)
@@ -89,15 +104,9 @@ function popupmenu1_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-data = importdata('stats.xlsx');
-data = data.textdata.Sheet1;
-for i = 2:length(data)
-    c{i-1} = data{i};
-end
-set(hObject,'String',c);
-% test change #3
-% testytestytesty
-% lollolololol
-% troll lol
-% test 2asdfjk;
-% another test
+
+global champions
+set(hObject, 'String', fieldnames(champions.data));
+
+
+
