@@ -62,14 +62,19 @@ guidata(hObject, handles);
 % uiwait(handles.figure1);
 
 global version
-global champions
+global champion
+global static_texts
 
 version_link = 'https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=f1153217-7b9e-4adc-9036-596a248cb50b';
 version = parse_json(urlread(version_link));
 version = version{1};
 
-all_champions_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion.json'];
-champions = parse_json(urlread(all_champions_link));
+champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion/Aatrox.json'];
+champion = parse_json(urlread(champion_link));
+champion = struct2cell(champion.data);
+champion = champion{1};
+
+static_texts = [];
 
 imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/Aatrox.png']));
 
@@ -94,9 +99,64 @@ function champion_menu_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from champion_menu
 
 global version
+global champion
+
 champion_list = cellstr(get(hObject,'String'));
 selected_champion = champion_list{get(hObject,'Value')};
+
+champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion/' selected_champion '.json'];
+champion = parse_json(urlread(champion_link));
+champion = struct2cell(champion.data);
+champion = champion{1};
+
 imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/' selected_champion '.png']));
+%{ 
+   Champion Stat Names. Example Call: champion.stats.hp
+    'hp'
+    'hpperlevel'
+    'mp'
+    'mpperlevel'
+    'movespeed'
+    'armor'
+    'armorperlevel'
+    'spellblock'
+    'spellblockperlevel'
+    'attackrange'
+    'hpregen'
+    'hpregenperlevel'
+    'mpregen'
+    'mpregenperlevel'
+    'crit'
+    'critperlevel'
+    'attackdamage'
+    'attackdamageperlevel'
+    'attackspeedoffset'
+    'attackspeedperlevel'
+%}
+
+set(handles.name,'String',champion.id)
+set(handles.title,'String',champion.title)
+set(handles.hp,'String',num2str(champion.stats.hp))
+set(handles.hpperlevel,'String',num2str(champion.stats.hpperlevel))
+set(handles.mp,'String',num2str(champion.stats.mp))
+set(handles.mpperlevel,'String',num2str(champion.stats.mpperlevel))
+set(handles.movespeed,'String',num2str(champion.stats.movespeed))
+set(handles.armor,'String',num2str(champion.stats.armor))
+set(handles.armorperlevel,'String',num2str(champion.stats.armorperlevel))
+set(handles.spellblock,'String',num2str(champion.stats.spellblock))
+set(handles.spellblockperlevel,'String',num2str(champion.stats.spellblockperlevel))
+set(handles.attackrange,'String',num2str(champion.stats.attackrange))
+set(handles.hpregen,'String',num2str(champion.stats.hpregen))
+set(handles.hpregenperlevel,'String',num2str(champion.stats.hpregenperlevel))
+set(handles.mpregen,'String',num2str(champion.stats.mpregen))
+set(handles.mpregenperlevel,'String',num2str(champion.stats.mpregenperlevel))
+set(handles.crit,'String',num2str(champion.stats.crit))
+set(handles.critperlevel,'String',num2str(champion.stats.critperlevel))
+set(handles.attackdamage,'String',num2str(champion.stats.attackdamage))
+set(handles.attackdamageperlevel,'String',num2str(champion.stats.attackdamageperlevel))
+set(handles.attackspeed,'String',num2str(.625/(champion.stats.attackspeedoffset+1)))
+set(handles.attackspeedperlevel,'String',num2str(champion.stats.attackspeedperlevel))
+
 
 % --- Executes during object creation, after setting all properties.
 function champion_menu_CreateFcn(hObject, eventdata, handles)
@@ -105,7 +165,11 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-global champions
+global version
+
+all_champions_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion.json'];
+champions = parse_json(urlread(all_champions_link));
+
 set(hObject, 'String', fieldnames(champions.data));
 
 
