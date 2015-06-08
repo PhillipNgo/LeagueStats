@@ -74,7 +74,11 @@ champion = parse_json(urlread(champion_link));
 champion = struct2cell(champion.data);
 champion = champion{1};
 
-static_texts = [];
+static_texts = [handles.hp handles.hpperlevel handles.mp handles.mpperlevel handles.movespeed handles.armor ...
+                handles.armorperlevel handles.spellblock handles.spellblockperlevel handles.attackrange ...
+                handles.hpregen handles.hpregenperlevel handles.mpregen handles.mpregenperlevel handles.crit ...
+                handles.critperlevel handles.attackdamage handles.attackdamageperlevel handles.attackspeed ...
+                handles.attackspeedperlevel];
 
 imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/Aatrox.png']));
 
@@ -100,6 +104,7 @@ function champion_menu_Callback(hObject, eventdata, handles)
 
 global version
 global champion
+global static_texts
 
 champion_list = cellstr(get(hObject,'String'));
 selected_champion = champion_list{get(hObject,'Value')};
@@ -136,27 +141,15 @@ imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/
 
 set(handles.name,'String',champion.id)
 set(handles.title,'String',champion.title)
-set(handles.hp,'String',num2str(champion.stats.hp))
-set(handles.hpperlevel,'String',num2str(champion.stats.hpperlevel))
-set(handles.mp,'String',num2str(champion.stats.mp))
-set(handles.mpperlevel,'String',num2str(champion.stats.mpperlevel))
-set(handles.movespeed,'String',num2str(champion.stats.movespeed))
-set(handles.armor,'String',num2str(champion.stats.armor))
-set(handles.armorperlevel,'String',num2str(champion.stats.armorperlevel))
-set(handles.spellblock,'String',num2str(champion.stats.spellblock))
-set(handles.spellblockperlevel,'String',num2str(champion.stats.spellblockperlevel))
-set(handles.attackrange,'String',num2str(champion.stats.attackrange))
-set(handles.hpregen,'String',num2str(champion.stats.hpregen))
-set(handles.hpregenperlevel,'String',num2str(champion.stats.hpregenperlevel))
-set(handles.mpregen,'String',num2str(champion.stats.mpregen))
-set(handles.mpregenperlevel,'String',num2str(champion.stats.mpregenperlevel))
-set(handles.crit,'String',num2str(champion.stats.crit))
-set(handles.critperlevel,'String',num2str(champion.stats.critperlevel))
-set(handles.attackdamage,'String',num2str(champion.stats.attackdamage))
-set(handles.attackdamageperlevel,'String',num2str(champion.stats.attackdamageperlevel))
-set(handles.attackspeed,'String',num2str(.625/(champion.stats.attackspeedoffset+1)))
-set(handles.attackspeedperlevel,'String',num2str(champion.stats.attackspeedperlevel))
 
+stats = struct2cell(champion.stats);
+for i = 1:length(static_texts)
+    if i ~= 19
+        set(static_texts(i), 'String' , num2str(stats{i}))
+    else
+        set(static_texts(i), 'String', num2str(.625/(1+stats{i})))
+    end
+end
 
 % --- Executes during object creation, after setting all properties.
 function champion_menu_CreateFcn(hObject, eventdata, handles)
