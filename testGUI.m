@@ -145,7 +145,7 @@ set(handles.title,'String',champion.title)
 stats = struct2cell(champion.stats);
 stats{19} = .625/(1+stats{19}); % calculates base attack speed
 for i = 1:length(static_texts)
-        set(static_texts(i), 'String' , num2str(stats{i}))
+    set(static_texts(i), 'String' , num2str(str2double(sprintf('%.3f',stats{i}))))
 end
 
 % --- Executes during object creation, after setting all properties.
