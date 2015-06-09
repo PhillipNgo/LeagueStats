@@ -22,7 +22,7 @@ function varargout = testGUI(varargin)
 
 % Edit the above text to modify the response to help testGUI
 
-% Last Modified by GUIDE v2.5 06-Jun-2015 21:05:56
+% Last Modified by GUIDE v2.5 08-Jun-2015 19:56:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,7 +43,7 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
+    
 % --- Executes just before testGUI is made visible.
 function testGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -62,26 +62,59 @@ guidata(hObject, handles);
 % uiwait(handles.figure1);
 
 global version
-global champion
 global static_texts
 
 version_link = 'https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=f1153217-7b9e-4adc-9036-596a248cb50b';
 version = parse_json(urlread(version_link));
 version = version{1};
 
-champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion/Aatrox.json'];
-champion = parse_json(urlread(champion_link));
-champion = struct2cell(champion.data);
-champion = champion{1};
+static_texts = [handles.hp handles.hpperlevel handles.mp handles.mpperlevel handles.armor handles.armorperlevel ...
+                handles.spellblock handles.spellblockperlevel handles.hpregen handles.hpregenperlevel ...
+                handles.mpregen handles.mpregenperlevel handles.crit handles.critperlevel handles.attackdamage ...
+                handles.attackdamageperlevel handles.attackspeed handles.attackspeedperlevel handles.abilitypower ...
+                handles.abilitypowerperlevel handles.cooldown handles.cooldownperlevel handles.attackrange ...
+                handles.movespeed];
 
-static_texts = [handles.hp handles.hpperlevel handles.mp handles.mpperlevel handles.movespeed handles.armor ...
-                handles.armorperlevel handles.spellblock handles.spellblockperlevel handles.attackrange ...
-                handles.hpregen handles.hpregenperlevel handles.mpregen handles.mpregenperlevel handles.crit ...
-                handles.critperlevel handles.attackdamage handles.attackdamageperlevel handles.attackspeed ...
-                handles.attackspeedperlevel];
+new_champion('Aatrox')
+display_values(handles)
 
-imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/Aatrox.png']));
 
+function [] = display_values(handles)
+
+    global version
+    global champion
+    global static_texts
+    
+    imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/' champion.id '.png']));
+    set(handles.name,'String',champion.id)
+    set(handles.title,'String',champion.title)
+    stats = struct2cell(champion.stats);
+    for i = 1:length(static_texts)
+        set(static_texts(i), 'String' , num2str(str2double(sprintf('%.3f',stats{i}))))
+    end
+
+function [] = new_champion(champ_name)
+    
+    global version
+    global champion
+    
+    champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion/' champ_name '.json'];
+    champion = parse_json(urlread(champion_link));
+    champion = struct2cell(champion.data);
+    champion = champion{1};
+    champion.stats.attackspeedoffset = .625/(1+champion.stats.attackspeedoffset); % calculates base attack speed
+    champion.stats.abilitypower = 0; % create ability power field
+    champion.stats.abilitypowerperlevel = 0; % create ability power per level field
+    champion.stats.cooldown = 0; % create cool down field
+    champion.stats.cooldownperlevel = 0; % create cool down per level field
+    
+    attackrange = champion.stats.attackrange;
+    movespeed = champion.stats.movespeed;
+    champion.stats = rmfield(champion.stats, 'attackrange');
+    champion.stats = rmfield(champion.stats, 'movespeed');
+    champion.stats.attackrange = attackrange;
+    champion.stats.movespeed = movespeed;
+   
 % --- Outputs from this function are returned to the command line.
 function varargout = testGUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -102,51 +135,13 @@ function champion_menu_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns champion_menu contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from champion_menu
 
-global version
-global champion
-global static_texts
-
 champion_list = cellstr(get(hObject,'String'));
 selected_champion = champion_list{get(hObject,'Value')};
 
-champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion/' selected_champion '.json'];
-champion = parse_json(urlread(champion_link));
-champion = struct2cell(champion.data);
-champion = champion{1};
+new_champion(selected_champion)
+display_values(handles)
 
-imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/' selected_champion '.png']));
-%{ 
-   Champion Stat Names. Example Call: champion.stats.hp
-    'hp'
-    'hpperlevel'
-    'mp'
-    'mpperlevel'
-    'movespeed'
-    'armor'
-    'armorperlevel'
-    'spellblock'
-    'spellblockperlevel'
-    'attackrange'
-    'hpregen'
-    'hpregenperlevel'
-    'mpregen'
-    'mpregenperlevel'
-    'crit'
-    'critperlevel'
-    'attackdamage'
-    'attackdamageperlevel'
-    'attackspeedoffset'
-    'attackspeedperlevel'
-%}
 
-set(handles.name,'String',champion.id)
-set(handles.title,'String',champion.title)
-
-stats = struct2cell(champion.stats);
-stats{19} = .625/(1+stats{19}); % calculates base attack speed
-for i = 1:length(static_texts)
-    set(static_texts(i), 'String' , num2str(str2nstats{i}))
-end
 
 % --- Executes during object creation, after setting all properties.
 function champion_menu_CreateFcn(hObject, eventdata, handles)
@@ -163,4 +158,42 @@ champions = parse_json(urlread(all_champions_link));
 set(hObject, 'String', fieldnames(champions.data));
 
 
+
+% --- Executes on selection change in levels_menu.
+function levels_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to levels_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns levels_menu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from levels_menu
+global champion
+
+level = get(hObject, 'Value');
+fields = fieldnames(champion.stats);
+new_champion(champion.id)
+
+for i  = 1:2:numel(fields)-3
+    if i == 17
+        champion.stats.(fields{i}) = champion.stats.(fields{i})*((.01*(level-1)*champion.stats.(fields{i+1}))+1);
+    else
+        champion.stats.(fields{i}) = champion.stats.(fields{i}) + champion.stats.(fields{i+1})*(level-1);
+    end
+end
+
+
+display_values(handles)
+% --- Executes during object creation, after setting all properties.
+function levels_menu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to levels_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+set(hObject, 'String', {1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18});
 
