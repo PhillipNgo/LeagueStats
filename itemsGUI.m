@@ -205,11 +205,11 @@ function add_item_Callback(hObject, eventdata, handles)
     close(itemsGUI)
 
     
-% --- Executes on button press in clear_item.
-function clear_item_Callback(hObject, eventdata, handles) %#ok<*INUSD>
-% hObject    handle to clear_item (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% --- Executes on button press in cancel.
+function cancel_Callback(hObject, eventdata, handles) %#ok<*INUSD>
+
+    setappdata(0, 'item', 'Item Slot')
+    close(itemsGUI)
 
 
 % --- Executes on selection change in item_list.
