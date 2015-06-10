@@ -14,7 +14,7 @@ champions = parse_json(urlread(all_champions_link));
 items = parse_json(urlread(items_link));
 
 %% Load a Specific Champion
-champion = 'Aatrox'; % change this to the champion you want
+champion = 'Azir'; % change this to the champion you want
 champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion/' champion '.json'];
 champion = parse_json(urlread(champion_link));
 
