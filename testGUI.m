@@ -26,7 +26,7 @@ function testGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     guidata(hObject, handles);
 
     global version % STRING variable that holds the version of the game
-    global static_texts % VECTOR variable that holds all the static text handles
+    global static_texts % VECTOR variable that holds the stats static text handles
     
     % reads riot's API and places the most current game version in the version variable
     version_link = 'https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=f1153217-7b9e-4adc-9036-596a248cb50b';
