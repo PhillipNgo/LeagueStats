@@ -148,11 +148,12 @@ function levels_menu_CreateFcn(hObject, eventdata, handles) %#ok<*INUSD>
     set(hObject, 'String', {1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18});
 
     
-function add_item(button)
+function add_item(button, slot)
 
     global version
     run_gui = itemsGUI;
     waitfor(run_gui);
+    global item_slots
     item = getappdata(0,'item');
     if length(item) > 1
         set(button, 'CData', [])
@@ -161,39 +162,45 @@ function add_item(button)
         set(button, 'CData', imresize(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/item/' item.image.full]),1.3))
         set(button, 'String', '')
     end
-
+    item_slots{slot} = item;
+    add_stats(slot)
     
+function add_stats(slot)
+    
+    global item_slots
+    stats = item_slots{slot};
+        
 % --- Executes on button press in item1.
 function item1_Callback(hObject, eventdata, handles) %#ok<*INUSL>
-
-    add_item(handles.item1)
-
+    
+    add_item(handles.item1, 1)
+    
 % --- Executes on button press in item2.
 function item2_Callback(hObject, eventdata, handles)
 
-    add_item(handles.item2)
-
+    add_item(handles.item2, 2)
+    
 % --- Executes on button press in item3.
 function item3_Callback(hObject, eventdata, handles)
 
-    add_item(handles.item3)
-
+    add_item(handles.item3, 3)
+    
 % --- Executes on button press in item4.
 function item4_Callback(hObject, eventdata, handles)
 
-    add_item(handles.item4)
+    add_item(handles.item4, 4)
 
 % --- Executes on button press in item5.
 function item5_Callback(hObject, eventdata, handles)
 
-    add_item(handles.item5)
+    add_item(handles.item5, 5)
 
 % --- Executes on button press in item6.
 function item6_Callback(hObject, eventdata, handles)
 
-    add_item(handles.item6)
+    add_item(handles.item6, 6)
 
 % --- Executes on button press in item7.
 function item7_Callback(hObject, eventdata, handles)
 
-    add_item(handles.item7)
+    add_item(handles.item7, 7)

@@ -148,6 +148,24 @@ function load_filters(handles, filter)
 
     set(handles.item_list, 'String', items_list);
 
+function text = readable(text)
+    
+    i = 1;
+    while i < length(text)
+        if strcmp(text(i), '<')
+            while ~strcmp(text(i), '>')
+                if strcmp(text(i), 'b')
+                    text(i) = char(10);
+                    i = i + 1;
+                end
+                text(i) = '';
+            end
+            text(i) = '';
+            i = i - 1;
+        end
+        i = i + 1;
+    end
+
 % --- Executes just before itemsGUI is made visible.
 function itemsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
@@ -165,7 +183,7 @@ function itemsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
     items_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/item.json'];
     items = parse_json(urlread(items_link));
-    set(gca, 'xtick', [], 'xticklabel', [], 'ytick', [], 'yticklabel', [])
+    set(gca, 'xtick', [], 'xticklabel', [], 'ytick', [], 'yticklabel', [], 'Color', [.5 .5 .5])
     load_filters(handles, 'All');
 
 
@@ -186,7 +204,6 @@ function filters_Callback(hObject, eventdata, handles)
     set(handles.item_list, 'Value', 1)
 
 
-
 % --- Executes during object creation, after setting all properties.
 function filters_CreateFcn(hObject, eventdata, handles)
 % Hint: listbox controls usually have a white background on Windows.
@@ -205,8 +222,8 @@ function add_item_Callback(hObject, eventdata, handles)
     close(itemsGUI)
 
     
-% --- Executes on button press in cancel.
-function cancel_Callback(hObject, eventdata, handles) %#ok<*INUSD>
+% --- Executes on button press in clear.
+function clear_Callback(hObject, eventdata, handles) %#ok<*INUSD>
 
     setappdata(0, 'item', 'Item Slot')
     close(itemsGUI)
@@ -222,7 +239,8 @@ function item_list_Callback(hObject, eventdata, handles)
     global chosen_item
     switch (get(hObject,'Value'))
         case 1
-          cla
+          cla(handles.axes1,'reset')
+          set(gca, 'xtick', [], 'xticklabel', [], 'ytick', [], 'yticklabel', [], 'Color', [.5 .5 .5])
           chosen_item = 'Item Slot';
           set(handles.name, 'String', 'Name')
           set(handles.price, 'String', 'N/A')
@@ -234,9 +252,10 @@ function item_list_Callback(hObject, eventdata, handles)
           set(handles.name, 'String', items_data{get(hObject,'Value')-1}.name)
           set(handles.price, 'String', num2str(items_data{get(hObject,'Value')-1}.gold.total))
           set(handles.sell, 'String', num2str(items_data{get(hObject,'Value')-1}.gold.sell))
-          set(handles.stats, 'String', items_data{get(hObject,'Value')-1}.description)
+          set(handles.stats, 'String', readable(items_data{get(hObject,'Value')-1}.description))
+          % disp(chosen_item.image.full) %uncomment to see item code
     end
-
+    
     
 % --- Executes during object creation, after setting all properties.
 function item_list_CreateFcn(hObject, eventdata, handles)
@@ -250,7 +269,8 @@ function item_list_CreateFcn(hObject, eventdata, handles)
 function item_search_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of item_search as text
 %        str2double(get(hObject,'String')) returns contents of item_search as a double
-
+    set(handles.filters, 'Value', 1)
+    set(handles.item_list, 'Value', 1)
     filter = get(handles.item_search, 'String');
     if isempty(filter)
         load_filters(handles, 'All');
