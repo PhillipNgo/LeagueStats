@@ -1,10 +1,10 @@
-function varargout = testGUI(varargin)
+function varargout = LeagueStatsGUI(varargin)
 
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @testGUI_OpeningFcn, ...
-                   'gui_OutputFcn',  @testGUI_OutputFcn, ...
+                   'gui_OpeningFcn', @LeagueStatsGUI_OpeningFcn, ...
+                   'gui_OutputFcn',  @LeagueStatsGUI_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -19,14 +19,14 @@ end
 % End initialization code - DO NOT EDIT
 
     
-% --- Executes just before testGUI is made visible.
-function testGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before LeagueStatsGUI is made visible.
+function LeagueStatsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
     handles.output = hObject;
     guidata(hObject, handles);
 
     global version % STRING variable that holds the version of the game
-    global static_texts % VECTOR variable that holds all the static text handles
+    global static_texts % VECTOR variable that holds the stats static text handles
     
     % reads riot's API and places the most current game version in the version variable
     version_link = 'https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=f1153217-7b9e-4adc-9036-596a248cb50b';
@@ -87,7 +87,7 @@ function new_champion(champ_name)
    
     
 % --- Outputs from this function are returned to the command line.
-function varargout = testGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = LeagueStatsGUI_OutputFcn(hObject, eventdata, handles) 
 
     varargout{1} = handles.output;
 
@@ -158,20 +158,23 @@ function levels_menu_CreateFcn(hObject, eventdata, handles) %#ok<*INUSD>
 function add_item(button, slot)
 
     global version
-    % run and wait for 
+    % run and wait for itemsGUI to finish
     run_gui = itemsGUI;
     waitfor(run_gui);
-    global item_slots
-    item = getappdata(0,'item');
-    if length(item) > 1
-        set(button, 'CData', [])
-        set(button, 'String', item)
-    else
+    
+    global item_slots % create item_slots which holds all items in inventory
+    item = getappdata(0,'item'); % retrieves item from appdata which itemGUI stored the selected item
+    
+    if length(item) > 1 % if no item is selected
+        set(button, 'CData', []) % reset button image
+        set(button, 'String', item) % reset button to 'Item Slot'
+    else % if there was a chosen item
+        % change image to selected item and change button text to nothing
         set(button, 'CData', imresize(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/item/' item.image.full]),1.3))
         set(button, 'String', '')
     end
-    item_slots{slot} = item;
-    add_stats(slot)
+    item_slots{slot} = item; % put item into the specified item slot
+    add_stats(slot) % add item stats to champion
     
 function add_stats(slot)
     
