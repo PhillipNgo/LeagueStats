@@ -26,14 +26,16 @@ function load_filters(handles, filter)
     item = struct2cell(items.data); % converts items.data into a CELL to loop through
     items_list = {'None'}; % CELL variable that adds all the names of the resultant items
     p = 2; % position in the items_list/items_data cells
-
+    
     % loop through CELL item
     % if item matches filter/search, add it it items_data and add its name to item_list. increase position p.
     for i = 1:length(item) 
         if strcmp(filter, 'All')
+            
             items_list{p} = item{i}.name;
             items_data{p-1} = item{i};
             p = p + 1;
+            
         elseif strcmp(filter, 'Health') && (isfield(item{i}.stats, 'FlatHPPoolMod') || ...
            isfield(item{i}.stats, 'rFlatHPModPerLevel') || isfield(item{i}.stats, 'PercentHPPoolMod'))
 
@@ -85,7 +87,7 @@ function load_filters(handles, filter)
             items_data{p-1} = item{i};
             p = p + 1;
 
-        elseif strcmp(filter, 'Movement Speed') && (isfield(item{i}.stats, 'FlatMovementSpeedMod') || ...
+        elseif strcmp(filter, ['Movement Speed' char(13) '']) && (isfield(item{i}.stats, 'FlatMovementSpeedMod') || ...
                isfield(item{i}.stats, 'rFlatMovementSpeedPerLevel') || isfield(item{i}.stats, 'PercentMovementSpeedMod') ...
                || isfield(item{i}.stats, 'rPercentMovementSpeedModPerLevel'))
 
@@ -145,6 +147,12 @@ function load_filters(handles, filter)
             items_list{p} = item{i}.name;
             items_data{p-1} = item{i};
             p = p + 1;
+            
+        elseif strcmp(filter, 'Other') && isempty(item{i}.stats) && sum(ismember(item{i}.tags, 'ManaRegen')) == 0 && sum(ismember(item{i}.tags, 'HealthRegen')) == 0
+
+            items_list{p} = item{i}.name;
+            items_data{p-1} = item{i};
+            p = p + 1;
         end
     end
     
@@ -194,13 +202,13 @@ function itemsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = itemsGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = itemsGUI_OutputFcn(hObject, eventdata, handles)  %#ok<*INUSL>
 
     varargout{1} = handles.output;
 
 
 % --- Executes on selection change in filters.
-function filters_Callback(hObject, eventdata, handles)
+function filters_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
 % Hints: contents = cellstr(get(hObject,'String')) returns filters contents as cell array
 %        filter = contents{get(hObject,'Value')} returns selected item from filters
 
@@ -227,7 +235,7 @@ function add_item_Callback(hObject, eventdata, handles)
 
     global chosen_item % get chosen_item
     
-    % set appdata 'item' to chosen_item to be retrieved by testGUI
+    % set appdata 'item' to chosen_item to be retrieved by LeagueStatsGUI
     setappdata(0, 'item', chosen_item)
     % close the GUI
     close(itemsGUI)
@@ -236,8 +244,8 @@ function add_item_Callback(hObject, eventdata, handles)
 % --- Executes on button press in clear.
 function clear_Callback(hObject, eventdata, handles) %#ok<*INUSD>
     
-    % set appdata 'item' to 'Item Slot' (no item) to be retrieved by testGUI
-    setappdata(0, 'item', 'Item Slot')
+    % set appdata 'item' to 'Clear' (reset item) to be retrieved by LeagueStatsGUI
+    setappdata(0, 'item', 'clear')
     % close the GUI
     close(itemsGUI)
 
@@ -254,7 +262,7 @@ function item_list_Callback(hObject, eventdata, handles)
         case 1 % if 'None' is selected
           cla(handles.axes1,'reset') % reset image on axis
           set(gca, 'xtick', [], 'xticklabel', [], 'ytick', [], 'yticklabel', [], 'Color', [.5 .5 .5]) % set axis to grey with no tick marks
-          chosen_item = 'Item Slot'; % chosen_item set to 'Item Slot' (no item)
+          chosen_item = 'clear'; % chosen_item set to 'Item Slot' (no item)
           set(handles.name, 'String', 'Name') % name text set to 'Name'
           set(handles.price, 'String', 'N/A') % price text set to 'N/A'
           set(handles.sell, 'String', 'N/A') % sell text set to 'N/A'
@@ -267,7 +275,7 @@ function item_list_Callback(hObject, eventdata, handles)
           set(handles.price, 'String', num2str(items_data{get(hObject,'Value')-1}.gold.total)) % price text set to total item's price
           set(handles.sell, 'String', num2str(items_data{get(hObject,'Value')-1}.gold.sell)) % sell text set to item's sell price
           set(handles.stats, 'String', readable(items_data{get(hObject,'Value')-1}.description)) % details text set to item description
-          % disp(chosen_item.image.full) %uncomment to see item code
+          % disp(chosen_item.image.full) % uncomment to see item code
     end
     
     

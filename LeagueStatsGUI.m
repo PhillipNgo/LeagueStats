@@ -66,6 +66,7 @@ function new_champion(champ_name)
     
     global version
     global champion
+    global item_slots
     
     champion_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/champion/' champ_name '.json'];
     champion = parse_json(urlread(champion_link)); % parse champion link
@@ -76,6 +77,9 @@ function new_champion(champ_name)
     champion.stats.abilitypowerperlevel = 0; % create ability power per level field
     champion.stats.cooldown = 0; % create cool down field
     champion.stats.cooldownperlevel = 0; % create cool down per level field
+    champion.itemstats = struct;
+    champion.runestats = struct;
+    champion.masterystats = struct;
     
     % reorders attackrange and movespeed to the bottom of champion.stats
     attackrange = champion.stats.attackrange;
@@ -85,12 +89,13 @@ function new_champion(champ_name)
     champion.stats.attackrange = attackrange;
     champion.stats.movespeed = movespeed;
    
-    
+    % create/reset item_slots
+    item_slots = cell(1,7);
 % --- Outputs from this function are returned to the command line.
 function varargout = LeagueStatsGUI_OutputFcn(hObject, eventdata, handles) 
-
+    
     varargout{1} = handles.output;
-
+    
 
 % --- Executes on selection change in champion_menu.
 function champion_menu_Callback(hObject, eventdata, handles)
@@ -158,6 +163,8 @@ function levels_menu_CreateFcn(hObject, eventdata, handles) %#ok<*INUSD>
 function add_item(button, slot)
 
     global version
+    setappdata(0, 'item', 'null') % set appdata to a null state
+    
     % run and wait for itemsGUI to finish
     run_gui = itemsGUI;
     waitfor(run_gui);
@@ -165,24 +172,133 @@ function add_item(button, slot)
     global item_slots % create item_slots which holds all items in inventory
     item = getappdata(0,'item'); % retrieves item from appdata which itemGUI stored the selected item
     
-    if length(item) > 1 % if no item is selected
+    if ~isempty(item_slots{slot}) % checks if there was an item is already in selected slot
+        remove_stats(item_slots{slot}); % if there is an item, removes it stats from champion
+        item_slots{slot} = [];
+    end
+    
+    if length(item) > 1 && strcmp(item, 'clear') % if no item is selected
         set(button, 'CData', []) % reset button image
         set(button, 'String', item) % reset button to 'Item Slot'
-    else % if there was a chosen item
+    elseif length(item) == 1 % if there was a chosen item
         % change image to selected item and change button text to nothing
         set(button, 'CData', imresize(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/item/' item.image.full]),1.3))
         set(button, 'String', '')
-    end
-    item_slots{slot} = item; % put item into the specified item slot
-    add_stats(slot) % add item stats to champion
-    
-function add_stats(slot)
-    
-    global item_slots
-    stats = item_slots{slot};
         
+        item_slots{slot} = item; % put item into the specified item slot
+        add_stats(item_slots{slot}) % add item stats to champion
+    end
+    
+    
+function remove_stats(object)
+    
+    global champion
+    
+    if strfind(object.image.sprite, 'rune')
+        stat_type = 'runestats';
+    elseif strfind(object.image.sprite, 'mastery')
+        stat_type = 'masterystats';
+    elseif strfind(object.image.sprite, 'item')
+        stat_type = 'itemstats';
+    end
+    
+    fields = fieldnames(object.stats); % get obect stat names and put into fields
+    for j = 1:length(fields) % loop through the stat names
+        champion.(stat_type).(fields{j}) = champion.(stat_type).(fields{j}) - object.stats.(fields{j});
+    end
+    
+    
+function add_stats(object)
+    
+    global champion
+    
+    if strfind(object.image.sprite, 'rune')
+        stat_type = 'runestats';
+    elseif strfind(object.image.sprite, 'mastery')
+        stat_type = 'masterystats';
+    elseif strfind(object.image.sprite, 'item')
+        stat_type = 'itemstats';
+    end
+     
+    if ~isempty(object.stats) % only continue if the object has stats
+        fields = fieldnames(object.stats); % get stat names and put into fields
+        for j = 1:length(fields) % loop through the stat names
+            if isfield(champion.itemstats, fields{j}) % if stat already exists in champion.itemstats, adds onto extisting value
+                champion.(stat_type).(fields{j}) = champion.(stat_type).(fields{j}) + object.stats.(fields{j});
+            else % else cretes the stat if it is not in champion.itemstats
+                champion.(stat_type).(fields{j}) = object.stats.(fields{j});
+            end
+        end
+    end
+
+    
+function update_stats()
+
+    global champion
+    
+    fields = fieldnames(champion.itemstats);
+    for i = 1:length(fields) 
+    %     'FlatHPPoolMod')
+    %     'rFlatHPModPerLevel')
+    %     'FlatMPPoolMod')
+    %     'rFlatMPModPerLevel')
+    %     'PercentHPPoolMod')
+    %     'PercentMPPoolMod')
+    %     'FlatHPRegenMod')
+    %     'rFlatHPRegenModPerLevel')
+    %     'PercentHPRegenMod')
+    %     'FlatMPRegenMod')
+    %     'rFlatMPRegenModPerLevel')
+    %     'PercentMPRegenMod')
+    %     'FlatArmorMod')
+    %     'rFlatArmorModPerLevel')
+    %     'PercentArmorMod')
+    %     'rFlatArmorPenetrationMod')
+    %     'rFlatArmorPenetrationModPerLevel')
+    %     'rPercentArmorPenetrationMod')
+    %     'rPercentArmorPenetrationModPerLevel')
+    %     'FlatPhysicalDamageMod')
+    %     'rFlatPhysicalDamageModPerLevel')
+    %     'PercentPhysicalDamageMod')
+    %     'FlatMagicDamageMod')
+    %     'rFlatMagicDamageModPerLevel')
+    %     'PercentMagicDamageMod')
+    %     'FlatMovementSpeedMod'
+    %     'rFlatMovementSpeedModPerLevel')
+    %     'PercentMovementSpeedMod')
+    %     'rPercentMovementSpeedModPerLevel')
+    %     'FlatAttackSpeedMod')
+    %     'PercentAttackSpeedMod')
+    %     'rPercentAttackSpeedModPerLevel')
+    %     'FlatCritChanceMod')
+    %     'rFlatCritChanceModPerLevel')
+    %     'PercentCritChanceMod')
+    %     'FlatCritDamageMod')
+    %     'rFlatCritDamageModPerLevel')
+    %     'PercentCritDamageMod')
+    %     'FlatBlockMod')
+    %     'PercentBlockMod')
+    %     'FlatSpellBlockMod')
+    %     'rFlatSpellBlockModPerLevel')
+    %     'PercentSpellBlockMod')
+    %     'rPercentCooldownMod')
+    %     'rPercentCooldownModPerLevel')
+    %     'rFlatGoldPer10Mod')
+    %     'rFlatMagicPenetrationMod')
+    %     'rFlatMagicPenetrationModPerLevel')
+    %     'rPercentMagicPenetrationMod')
+    %     'rPercentMagicPenetrationModPerLevel')
+    %     'FlatEnergyRegenMod')
+    %     'rFlatEnergyRegenModPerLevel')
+    %     'FlatEnergyPoolMod')
+    %     'rFlatEnergyModPerLevel')
+    %     'PercentLifeStealMod')
+    %     'PercentSpellVampMod')
+    end
+
+
 % --- Executes on button press in item1.
-function item1_Callback(hObject, eventdata, handles) %#ok<*INUSL>
+function item1_Callback(hObject, eventdata, handles) %#ok<*DEFNU,*INUSL>
     
     add_item(handles.item1, 1)
     
