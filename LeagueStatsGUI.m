@@ -40,10 +40,13 @@ function LeagueStatsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
                     handles.attackdamageperlevel handles.attackspeed handles.attackspeedperlevel handles.abilitypower ...
                     handles.abilitypowerperlevel handles.cooldown handles.cooldownperlevel handles.attackrange ...
                     handles.movespeed];
-
+                
+    imshow(imread('logo.png'))
+    
     new_champion('Aatrox') % open's the GUI with Aatrox loaded
     display_values(handles) % display's Aatrox's values in each text field
-
+   
+    
 % --- Function that updates all static text with current champion values
 function display_values(handles)
 
@@ -52,15 +55,31 @@ function display_values(handles)
     global static_texts 
     
     % update champion image from riot's API
-    imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/' champion.id '.png'])); 
+    axes(handles.axes1)
+    imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/champion/' champion.id '.png']))
     set(handles.name,'String',champion.id) % set name text to current champion's name
     set(handles.title,'String',champion.title) % set champion's title under champion's name
     stats = struct2cell(champion.stats); % converts 1x1 champion.stats structure to cell in order to loop through
     for i = 1:length(static_texts) % loops through static_text and stats 
         set(static_texts(i), 'String' , num2str(str2double(sprintf('%.3f',stats{i}))))
     end
-
- 
+    
+    images{1} = imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/passive/' champion.passive.image.full]);
+    set(handles.desc1, 'String', champion.passive.description)
+    
+    % not done in one loop to stop staggering the description/image changes
+    for i = 1:4
+        set(handles.(['desc' num2str(i+1)]), 'String', champion.spells{i}.description)
+        images{i+1} = imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/spell/' champion.spells{i}.image.full]);
+    end
+     
+    for i = 1:5
+        curr_axes = ['axes' num2str(i+3)];
+        axes(handles.(curr_axes))
+        imshow(images{i})
+    end
+    
+    
 % --- Function that updates champion variable with champion String 'champ_name'
 function new_champion(champ_name)
     
@@ -80,6 +99,7 @@ function new_champion(champ_name)
     champion.itemstats = struct;
     champion.runestats = struct;
     champion.masterystats = struct;
+    champion.levelstats = struct;
     
     % reorders attackrange and movespeed to the bottom of champion.stats
     attackrange = champion.stats.attackrange;
@@ -91,6 +111,8 @@ function new_champion(champ_name)
    
     % create/reset item_slots
     item_slots = cell(1,7);
+    
+    
 % --- Outputs from this function are returned to the command line.
 function varargout = LeagueStatsGUI_OutputFcn(hObject, eventdata, handles) 
     
@@ -124,7 +146,6 @@ function champion_menu_CreateFcn(hObject, eventdata, handles)
     champions = parse_json(urlread(all_champions_link));
 
     set(hObject, 'String', fieldnames(champions.data)); % set champions to dropdown menu
-
 
 
 % --- Executes on selection change in levels_menu.
@@ -331,3 +352,59 @@ function item6_Callback(hObject, eventdata, handles)
 function item7_Callback(hObject, eventdata, handles)
 
     add_item(handles.item7, 7)
+
+
+% --- Executes on button press in edit_runes.
+function edit_runes_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_runes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in clear_runes.
+function clear_runes_Callback(hObject, eventdata, handles)
+% hObject    handle to clear_runes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in clear_masteries.
+function clear_masteries_Callback(hObject, eventdata, handles)
+% hObject    handle to clear_masteries (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in edit_masteries.
+function edit_masteries_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_masteries (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in clear_items.
+function clear_items_Callback(hObject, eventdata, handles)
+% hObject    handle to clear_items (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in load_build.
+function load_build_Callback(hObject, eventdata, handles)
+% hObject    handle to load_build (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton38.
+function pushbutton38_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton38 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in clear_all.
+function clear_all_Callback(hObject, eventdata, handles)
+% hObject    handle to clear_all (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
