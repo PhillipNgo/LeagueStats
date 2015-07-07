@@ -21,7 +21,7 @@ end
     
 % --- Executes just before LeagueStatsGUI is made visible.
 function LeagueStatsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
-
+    
     handles.output = hObject;
     guidata(hObject, handles);
 
@@ -45,7 +45,40 @@ function LeagueStatsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     
     new_champion('Aatrox') % open's the GUI with Aatrox loaded
     display_values(handles) % display's Aatrox's values in each text field
-   
+ 
+
+% --- Function that takes an item description (text), removes all special formatting, and adds line breaks where necessary
+function text = readable(text, spell)
+
+    
+    
+    while strfind(text, '<br><br>') % if there are double linebreaks
+        index = regexp(text, '<br><br>'); % find the starting index
+        text(index:index+3) = ''; % remove one line break
+    end
+    
+    i = 1; % the position within the string
+    while i < length(text) % loop through the string
+        if strcmp(text(i), '<') % '<' notes the beginning of special formatting
+            while ~strcmp(text(i), '>') % '>' notes the end of special formatting
+                if strcmp(text(i), 'b') % <br> is notation for linebreak
+                    text(i) = char(10); % char(10) adds linebreak
+                    i = i + 1; 
+                end
+                text(i) = ''; % remove letter at current position
+            end
+            text(i) = ''; 
+            i = i - 1;
+        end
+%         if strcmp(text(i), '{{ e')
+%             index = regexp(text, '{{ e');
+%             num = str2double(text(index+3))+1;
+%             text(index) = spell.effect{num}.
+%             
+%         end
+        i = i + 1;
+    end
+    
     
 % --- Function that updates all static text with current champion values
 function display_values(handles)
@@ -69,13 +102,15 @@ function display_values(handles)
     
     % not done in one loop to stop staggering the description/image changes
     for i = 1:4
-        set(handles.(['desc' num2str(i+1)]), 'String', champion.spells{i}.description)
+        set(handles.(['desc' num2str(i+1)]), 'String', readable(champion.spells{i}.tooltip, champion.spells{i}))
+        set(handles.(['desc' num2str(i+1) num2str(i+1)]), 'String', ['Cooldown: ' champion.spells{i}.cooldownBurn])
+        set(handles.(['desc' num2str(i+1) num2str(i+1) num2str(i+1)]), 'String', ['Cost: ' readable(champion.spells{i}.resource)])
         images{i+1} = imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/spell/' champion.spells{i}.image.full]);
     end
      
     for i = 1:5
         curr_axes = ['axes' num2str(i+3)];
-        axes(handles.(curr_axes))
+        axes(handles.(curr_axes)) %#ok<LAXES>
         imshow(images{i})
     end
     
@@ -408,3 +443,144 @@ function clear_all_Callback(hObject, eventdata, handles)
 % hObject    handle to clear_all (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes when figure1 is resized.
+function figure1_ResizeFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in qlevels.
+function qlevels_Callback(hObject, eventdata, handles)
+% hObject    handle to qlevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns qlevels contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from qlevels
+
+
+% --- Executes during object creation, after setting all properties.
+function qlevels_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to qlevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in wlevels.
+function wlevels_Callback(hObject, eventdata, handles)
+% hObject    handle to wlevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns wlevels contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from wlevels
+
+
+% --- Executes during object creation, after setting all properties.
+function wlevels_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to wlevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in elevels.
+function elevels_Callback(hObject, eventdata, handles)
+% hObject    handle to elevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns elevels contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from elevels
+
+
+% --- Executes during object creation, after setting all properties.
+function elevels_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to elevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in rlevels.
+function rlevels_Callback(hObject, eventdata, handles)
+% hObject    handle to rlevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns rlevels contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from rlevels
+
+
+% --- Executes during object creation, after setting all properties.
+function rlevels_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to rlevels (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function file_menu_Callback(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function new_build_Callback(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function save_Callback(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function save_as_Callback(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function edit_Callback(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function help_Callback(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function read_me_Callback(hObject, eventdata, handles)
+
+    eval(['!notepad ' cd '/Read Me.txt'])
+
+    
+% --------------------------------------------------------------------
+function github_homepage_Callback(hObject, eventdata, handles)
+
+    web('https://github.com/phllpng/LeagueStats', '-browser')
+
+
+% --------------------------------------------------------------------
+function default_theme_Callback(hObject, eventdata, handles)
+
+

@@ -164,8 +164,8 @@ function text = readable(text)
     
     i = 1; % the position within the string
     while i < length(text) % loop through the string
-        if strcmp(text(i), '<') % '>' notes the beginning of special formatting
-            while ~strcmp(text(i), '>') % '<' notes the end of special formatting
+        if strcmp(text(i), '<') % '<' notes the beginning of special formatting
+            while ~strcmp(text(i), '>') % '>' notes the end of special formatting
                 if strcmp(text(i), 'b') % <br> is notation for linebreak
                     text(i) = char(10); % char(10) adds linebreak
                     i = i + 1; 
