@@ -275,7 +275,7 @@ function item_list_Callback(hObject, eventdata, handles)
           set(handles.price, 'String', num2str(items_data{get(hObject,'Value')-1}.gold.total)) % price text set to total item's price
           set(handles.sell, 'String', num2str(items_data{get(hObject,'Value')-1}.gold.sell)) % sell text set to item's sell price
           set(handles.stats, 'String', readable(items_data{get(hObject,'Value')-1}.description)) % details text set to item description
-          % disp(chosen_item.image.full) % uncomment to see item code
+          % disp(chosen_item.image.full) % uncomment to see item code when clicked on
     end
     
     
