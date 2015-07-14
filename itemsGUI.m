@@ -18,6 +18,7 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+
 % --- Function that display filter/search results in the second listbox
 function load_filters(handles, filter)
 

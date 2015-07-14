@@ -43,9 +43,8 @@ function LeagueStatsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
                     handles.mpregen handles.mpregenperlevel handles.crit handles.critperlevel handles.attackdamage ...
                     handles.attackdamageperlevel handles.attackspeed handles.attackspeedperlevel handles.abilitypower ...
                     handles.abilitypowerperlevel handles.cooldown handles.cooldownperlevel handles.attackrange ...
-                    handles.movespeed];
-               
-    imshow(imread('logo.png'))
+                    handles.movespeed handles.armorpenetration handles.percentarmorpenetration handles.magicpenetration ...
+                    handles.percentmagicpenetration handles.lifesteal handles.spellvamp];
     
     new_champion('Aatrox', handles) % open's the GUI with Aatrox loaded
     display_values(handles) % display's Aatrox's values in each text field
@@ -189,7 +188,7 @@ function display_values(handles)
        
     fields = {'FlatHPPoolMod' 'rFlatHPModPerLevel' 'FlatMPPoolMod' 'rFlatMPModPerLevel' 'FlatArmorMod' 'rFlatArmorModPerLevel' ...
               'FlatSpellBlockMod' 'rFlatSpellBlockModPerLevel' 'FlatHPRegenMod' 'rFlatHPRegenModPerLevel' ...
-              'FlatMPRegenMod' 'rFlatMPRegenModPerLevel' 'FlatCritChanceMod' 'rFlatCritDamageModPerLevel' 'FlatPhysicalDamageMod' ...
+              'FlatMPRegenMod' 'rFlatMPRegenModPerLevel' 'FlatCritChanceMod' 'rFlatCritChanceModPerLevel' 'FlatPhysicalDamageMod' ...
               'rFlatPhysicalDamageModPerLevel' 'PercentAttackSpeedMod' 'rPercentAttackSpeedModPerLevel' 'FlatMagicDamageMod' ...
               'rFlatMagicDamageModPerLevel' 'rPercentCooldownMod' 'rPercentCooldownModPerLevel' 'FlatMovementSpeedMod' 'rFlatArmorPenetrationMod' ...
               'rPercentArmorPenetrationMod' 'rFlatMagicPenetrationMod' 'rPercentMagicPenetrationMod' 'PercentLifeStealMod' ...
@@ -202,11 +201,11 @@ function display_values(handles)
         if i ~= 23
             if i ~= 17
                 champion.bonusstats.(fields{j}) = champion.itemstats.(fields{j}) + champion.runestats.(fields{j}) ...
-                         + champion.masterystats.(fields{j}) + champion.levelstats.(fields{j});
+                    + champion.masterystats.(fields{j}) + champion.levelstats.(fields{j});
                 stats{i} = stats{i} + champion.bonusstats.(fields{j});
             else
                 stats{i} = stats{i}*(1 + champion.itemstats.(fields{j}) + champion.runestats.(fields{j}) ...
-                         + champion.masterystats.(fields{j}) + (champion.levelstats.(fields{j})*.01));
+                    + champion.masterystats.(fields{j}) + (champion.levelstats.(fields{j})*.01));
             end
             j = j + 1;
         end
@@ -220,7 +219,7 @@ function display_values(handles)
     for i = 2:5
         set(handles.(['desc' num2str(i)]), 'String', readable(champion.spells{i-1}.tooltip, i-1, handles))
         if get(handles.(['levels' num2str(i-1)]), 'Value') - 1 ~= 0
-            set(handles.(['desc' num2str(i) num2str(i)]), 'String', ['Cooldown: ' num2str(champion.spells{i-1}.cooldown{i-1})])
+            set(handles.(['desc' num2str(i) num2str(i)]), 'String', ['Cooldown: ' num2str(champion.spells{i-1}.cooldown{get(handles.(['levels' num2str(i-1)]), 'Value')-1})])
         else
             set(handles.(['desc' num2str(i) num2str(i)]), 'String', ['Cooldown: ' champion.spells{i-1}.cooldownBurn])
         end
@@ -264,12 +263,12 @@ function new_champion(champ_name, handles)
     champion.stats.attackrange = attackrange;
     champion.stats.movespeed = movespeed;
    
-    champion.stats.armorpenetration = 0;
+    champion.stats.armorpenetration = 15;
     champion.stats.percentarmorpenetration = 0;
     champion.stats.magicpenetration = 0;
     champion.stats.percentmagicpenetration = 0;
     champion.stats.lifesteal = 0;
-    champion.stats.spellvamp = 0;
+    champion.stats.spellvamp = 15;
     champion.itemstats = items.basic.stats;
     champion.runestats = champion.itemstats;
     champion.masterystats = champion.itemstats;
@@ -522,10 +521,6 @@ function edit_masteries_Callback(hObject, eventdata, handles)
 function clear_items_Callback(hObject, eventdata, handles)
 
 
-% --- Executes on button press in pushbutton38.
-function pushbutton38_Callback(hObject, eventdata, handles)
-
-
 % --- Executes when figure1 is resized.
 function figure1_ResizeFcn(hObject, eventdata, handles)
 
@@ -613,7 +608,7 @@ function levels4_CreateFcn(hObject, eventdata, handles)
 function file_menu_Callback(hObject, eventdata, handles)
 
 
-    function loadbuild_Callback(hObject, eventdata, handles)
+    function load_build_Callback(hObject, eventdata, handles)
 
 
     function new_build_Callback(hObject, eventdata, handles)
@@ -629,7 +624,7 @@ function file_menu_Callback(hObject, eventdata, handles)
 function edit_menu_Callback(hObject, eventdata, handles)
 
 
-    function clearall_Callback(hObject, eventdata, handles)
+    function clear_all_Callback(hObject, eventdata, handles)
         
         global champion
 
@@ -725,14 +720,6 @@ function view_menu_Callback(hObject, eventdata, handles)
 
         show_stats('mastery')
 
-
-
-
-
-
-
-
-    
 
 
 
