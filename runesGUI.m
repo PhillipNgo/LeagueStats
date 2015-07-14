@@ -101,11 +101,41 @@ function runesGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     runes_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/rune.json'];
     runes = parse_json(urlread(runes_link));
     
-    curr_runes = struct;
-    curr_runes.stats = runes.basic.stats;
-    curr_runes.names = {};
-    curr_runes.num = {};
-    curr_runes.runes = {};
+    curr_runes = getappdata(0,'rune');
+    if isempty(curr_runes)
+        curr_runes = struct;
+        curr_runes.stats = runes.basic.stats;
+        curr_runes.names = {};
+        curr_runes.num = {};
+        curr_runes.runes = {};
+    elseif ~isempty(curr_runes.names)
+        for i = 1:length(curr_runes.num)
+            new_list{i} = [num2str(curr_runes.num{i}) 'x ' curr_runes.names{i}];
+        end
+        set(handles.current_runes, 'String', new_list)
+        for i = 1:4
+            count = 0;
+            switch i
+                case 1
+                    type = 'Mark';
+                case 2
+                    type = 'Seal';
+                case 3
+                    type = 'Glyph';
+                case 4
+                    type = 'Quint';
+            end
+
+            index = find(cellfun('length',regexp(curr_runes.names, type)) == 1);
+            if ~isempty(index)
+                for j = 1:length(index)
+                    count = count + curr_runes.num{index(j)};
+                end
+            end
+            set(handles.(['count' num2str(i)]), 'String', num2str(count))
+        end
+    end
+    
     curr_runes.state = false;
     
     % format axis so that it is grey with no #tick marks
@@ -270,11 +300,10 @@ function add_runes_Callback(hObject, eventdata, handles)
     global curr_runes % get chosen_item
     
     curr_runes = rmfield(curr_runes, 'state');
-    curr_runes = rmfield(curr_runes, 'runes');
     % set appdata 'rune' to chosen_item to be retrieved by LeagueStatsGUI
-    setappdata(0, 'rune', chosen_item)
+    setappdata(0, 'rune', curr_runes)
     % close the GUI
-    close(itemsGUI)
+    close(runesGUI)
 
     
 % --- Executes on button press in clear_runes.

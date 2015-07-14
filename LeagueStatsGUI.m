@@ -28,6 +28,7 @@ function LeagueStatsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     global version % STRING variable that holds the version of the game
     global static_texts % VECTOR variable that holds the stats static text handles
     global items % STRUCTURE variable that holds all items
+    global curr_runes % STRUCTURE variable that holds all runes
     
     % reads riot's API and places the most current game version in the version variable
     version_link = 'https://global.api.pvp.net/api/lol/static-data/na/v1.2/versions?api_key=f1153217-7b9e-4adc-9036-596a248cb50b';
@@ -36,6 +37,8 @@ function LeagueStatsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
     items_link = ['http://ddragon.leagueoflegends.com/cdn/' version '/data/en_US/item.json'];
     items = parse_json(urlread(items_link));
+    
+    curr_runes = [];
     
     % put all static text handles into static_text in the order of champion.stats
     static_texts = [handles.hp handles.hpperlevel handles.mp handles.mpperlevel handles.armor handles.armorperlevel ...
@@ -503,12 +506,43 @@ function item7_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in edit_runes.
 function edit_runes_Callback(hObject, eventdata, handles)
-
-
+    
+    global champion
+    global curr_runes
+    
+    setappdata(0, 'rune', curr_runes) % set appdata to a null state
+    
+    % run and wait for itemsGUI to finish
+    run_gui = runesGUI;
+    waitfor(run_gui);
+    
+    curr_runes = getappdata(0,'rune'); % retrieves runes from appdata which runesGUI stored the selected item'
+    if ~isempty(curr_runes)
+        str = {};
+        for i = 1:length(curr_runes.names)
+            str = [str [num2str(curr_runes.num{i}) 'x ' curr_runes.names{i} char(10)]];
+        end
+        set(handles.runedesc, 'String', str)
+        
+        champion.runestats = curr_runes.stats;
+        display_values(handles)
+    end
+    
+    
 % --- Executes on button press in clear_runes.
 function clear_runes_Callback(hObject, eventdata, handles)
 
-
+    global curr_runes
+    global champion
+    global items
+    
+    curr_runes = [];
+    champion.runestats = items.basic.stats;
+    
+    set(handles.runedesc, 'String', '')
+    display_values(handles)
+    
+    
 % --- Executes on button press in clear_masteries.
 function clear_masteries_Callback(hObject, eventdata, handles)
 
@@ -689,12 +723,12 @@ function view_menu_Callback(hObject, eventdata, handles)
     function show_stats(type)
         
         global champion
-        msg = upper([type ' stats:' char(10) char(10)]);
+        msg = {upper([type ' stats:' char(10)])};
         fields = fieldnames(champion.([type 'stats']));
         list = 1;
         for i = 1:length(fields)
             if champion.([type 'stats']).(fields{i}) ~= 0
-                msg = [msg '        ' num2str(list) '. ' fields{i} ': ' num2str(champion.([type 'stats']).(fields{i})) char(10) char(10)];
+                msg = [msg ['        ' num2str(list) '. ' fields{i} ': ' num2str(champion.([type 'stats']).(fields{i})) char(10)]];
                 list = list + 1;
             end
         end
