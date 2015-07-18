@@ -65,20 +65,12 @@ function text = readable(text, spell, handles)
     
     i = 1; % the position within the string
     while i < length(text) % loop through the string
-        if strcmp(text(i), '<') % '<' notes the beginning of special formatting
-            while ~strcmp(text(i), '>') % '>' notes the end of special formatting
-                if strcmp(text(i), 'b') % <br> is notation for linebreak
-                    text(i) = char(10); % char(10) adds linebreak
-                    i = i + 1; 
-                end
-                text(i) = ''; % remove letter at current position
-            end
-            text(i) = '';
-            if i > 1
-               i = i - 1; 
-            end
-        end
         
+        if strcmp(text(i:i+1), '<s') % '<' notes the beginning of special formatting
+            text(i+6:i+10) = 'style';
+            i = i + 17;
+            text = [text(1:i) ':#' text(i+1:length(text))];
+        end
         
         if i < length(text) - 3 && strcmp(text(i:i+2), '{{ ') 
             
@@ -104,8 +96,6 @@ function text = readable(text, spell, handles)
             end
             
             if level > 0 && ~strcmp(text(i+3), 'f')
-                
-                
                 if num <= length(champion.spells{spell}.effect)
                     values = field;
                     
@@ -114,19 +104,19 @@ function text = readable(text, spell, handles)
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'bonusattackdamage')
                         value = sprintf('%.1f', champion.bonusstats.FlatPhysicalDamageMod*coefficient);
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'spelldamage')
-                        value = num2str((champion.bonusstats.FlatMagicDamageMod + champion.stats.abilitypower)*coefficient);
+                        value = sprintf('%.1f', (champion.bonusstats.FlatMagicDamageMod + champion.stats.abilitypower)*coefficient);
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'attackdamage')
-                        value = num2str((champion.bonusstats.FlatPhysicalDamageMod + champion.stats.attackdamage)*coefficient);
+                        value = sprintf('%.1f', (champion.bonusstats.FlatPhysicalDamageMod + champion.stats.attackdamage)*coefficient);
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'bonusarmor')
                         value = sprintf('%.1f', champion.bonusstats.FlatArmorMod*coefficient);
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'bonusspellblock')
                         value = sprintf('%.1f', champion.bonusstats.FlatSpellBlockMod*coefficient);
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'armor')
-                        value = num2str((champion.bonusstats.FlatPhysicalDamageMod + champion.stats.armor)*coefficient);
+                        value = sprintf('%.1f', (champion.bonusstats.FlatPhysicalDamageMod + champion.stats.armor)*coefficient);
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'bonushealth')
                         value = sprintf('%.1f', champion.bonusstats.FlatHPPoolMod*coefficient);
                     elseif strcmp(champion.spells{spell}.vars{num}.link, 'health')
-                        value = num2str((champion.bonusstats.FlatHPPoolMod + champion.stats.hp)*coefficient);
+                        value = sprintf('%.1f', (champion.bonusstats.FlatHPPoolMod + champion.stats.hp)*coefficient);
                     end                    
                     
                     for j = 1:length(value)
@@ -182,6 +172,10 @@ function text = readable(text, spell, handles)
         i = i + 1;
     end
     
+function text = html(text)
+        
+    text = ['<html><font color="white" face="Trebuchet MS">' text];
+    
     
 % --- Function that updates all static text with current champion values
 function display_values(handles)
@@ -217,10 +211,28 @@ function display_values(handles)
         set(static_texts(i), 'String' , num2str(str2double(sprintf('%.3f', stats{i}))))
     end
     
-    set(handles.desc1, 'String', readable(champion.passive.description, 0, handles))
+    jLabel = javax.swing.JLabel(readable(html(champion.passive.description), 0, handles));
+    jLabel.setBackground(java.awt.Color(0,0,0))
+    jLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP)
+    javacomponent(jLabel, [1100, 654, 401, 108], gcf);
+    
     % not done in one loop to stop staggering the description/image changes
     for i = 2:5
-        set(handles.(['desc' num2str(i)]), 'String', readable(champion.spells{i-1}.tooltip, i-1, handles))
+        switch i
+            case 2
+                pos = [1100, 499, 401, 108];
+            case 3
+                pos = [1100, 342, 401, 108];
+            case 4
+                pos = [1100, 192, 401, 108];
+            case 5
+                pos = [1100, 41, 401, 108];
+        end
+        jLabel = javax.swing.JLabel(readable(html(champion.spells{i-1}.tooltip), i-1, handles));
+        jLabel.setBackground(java.awt.Color(0,0,0))
+        jLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP)
+        javacomponent(jLabel, pos, gcf);
+        
         if get(handles.(['levels' num2str(i-1)]), 'Value') - 1 ~= 0
             set(handles.(['desc' num2str(i) num2str(i)]), 'String', ['Cooldown: ' num2str(champion.spells{i-1}.cooldown{get(handles.(['levels' num2str(i-1)]), 'Value')-1})])
         else
@@ -228,6 +240,8 @@ function display_values(handles)
         end
         set(handles.(['desc' num2str(i) num2str(i) num2str(i)]), 'String', ['Cost: ' readable(champion.spells{i-1}.resource, i-1, handles)])
     end
+    
+    
     
 function reset_levels(handles)
     
@@ -306,6 +320,7 @@ function varargout = LeagueStatsGUI_OutputFcn(hObject, eventdata, handles)
     
     varargout{1} = handles.output;
     
+     
 
 % --- Executes on selection change in champion_menu.
 function champion_menu_Callback(hObject, eventdata, handles)

@@ -51,6 +51,13 @@ function load_filters(handles, filter, filter2, filter3)
     % sets resultant runes_list to the values in the third listbox
     set(handles.rune_list, 'String', runes_list);
     
+    if isempty(runes_list)
+        set(handles.rune_list, 'Enable', 'inactive')
+    else
+        set(handles.rune_list, 'Enable', 'on')
+    end
+    
+    
 function val = find_property_filter(filter, rune) 
 
     val = false;
@@ -253,8 +260,9 @@ function rune_list_Callback(hObject, eventdata, handles)
 
     global version 
     global chosen_rune % STRUCTURE variable that holds the currently selected rune
-    rune_list = get_list(); % list of filtered runes
     
+   
+    rune_list = get_list(); % list of filtered runes
     chosen_rune = rune_list{get(hObject,'Value')}; % chosen_rune set to currently selected rune
     % set currently selected items image to axis
     imshow(imread(['http://ddragon.leagueoflegends.com/cdn/' version '/img/rune/' rune_list{get(hObject,'Value')}.image.full]));
@@ -262,7 +270,7 @@ function rune_list_Callback(hObject, eventdata, handles)
     name = chosen_rune.name;
     if strcmp(name(1:6), 'Lesser')
         name = name(7:length(name));
-    elseif strcmp(name(1:7), 'Greater') 
+    elseif strcmp(name(1:7), 'Greater')
         name = name(8:length(name));
     end
     
@@ -270,7 +278,7 @@ function rune_list_Callback(hObject, eventdata, handles)
     set(handles.tier, 'String', num2str(chosen_rune.rune.tier)) % tier text set to rune tier
     set(handles.desc, 'String', chosen_rune.description) % desc text set to rune description
     %disp(chosen_rune.tags{1}) % uncomment to see item code when clicked on
-
+    
     set(handles.add_text, 'String', '0')
     set(handles.add_slider, 'Value', 0)
     set(handles.add_slider, 'Max', max_value(handles, 'add'))
@@ -285,6 +293,7 @@ function rune_list_Callback(hObject, eventdata, handles)
     if get(handles.remove_slider, 'Max') ~= .5
         set(handles.remove_slider, 'SliderStep', [1/get(handles.remove_slider, 'Max') 10/get(handles.remove_slider, 'Max')])
     end
+    
     
 % --- Executes during object creation, after setting all properties.
 function rune_list_CreateFcn(hObject, eventdata, handles)
@@ -340,7 +349,8 @@ function clear_runes_Callback(hObject, eventdata, handles)
     end
    
     set(handles.current_runes, 'String', {})
-
+    set(handles.current_runes, 'Enable', 'inactive')
+    
     
 % --- Executes on selection change in current_runes.
 function current_runes_Callback(hObject, eventdata, handles)
@@ -416,6 +426,7 @@ function add_Callback(hObject, eventdata, handles)
         if get(handles.add_slider, 'Max') ~= .5
             set(handles.add_slider, 'SliderStep', [1/(max_value(handles, 'add')) 10/(max_value(handles, 'add'))])
         end
+        set(handles.current_runes, 'Enable', 'on')
     end
     
     
@@ -497,7 +508,9 @@ function remove_Callback(hObject, eventdata, handles)
             set(handles.current_runes, 'Value', length(new_list))
         end
         set(handles.current_runes, 'String', new_list)
-        
+        if isempty(new_list)
+            set(handles.current_runes, 'Enable', 'inactive')
+        end
         
         if max_value(handles, 'remove') - str2double(get(handles.remove_text, 'String')) < 0
             set(handles.remove_text, 'String', 0)
